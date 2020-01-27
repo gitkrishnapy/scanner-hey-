@@ -1,5 +1,6 @@
 
-# clean code
+# Scanner device utility using Twain module 
+# Built with Python 2.7 
 
 import Tkinter as tk
 import Tkconstants
