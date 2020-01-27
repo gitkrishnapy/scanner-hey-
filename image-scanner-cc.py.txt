@@ -1,0 +1,131 @@
+
+# clean code
+
+import Tkinter as tk
+import Tkconstants
+import tkFileDialog
+from imagescanner import ImageScanner
+import tkMessageBox
+import imagescanner.backends.twain
+import imagescanner.backends.net
+
+# open GUI window
+startwindow = tk.Tk()
+startwindow.title("Image Scanner")
+startwindow.resizable(width=False, height=False)
+startwindow.geometry('400x170')
+
+# divide window into frames
+frame1 = tk.Frame(startwindow)
+frame1.grid(column=0, row=0)
+frame2= tk.Frame(startwindow)
+frame2.grid(column=0, row=1)
+frame3= tk.Frame(startwindow)
+frame3.grid(column=0, row=3)
+
+# instantiate the imagescanner obj
+iscanner = ImageScanner()
+
+# get all available devices as a list of strings to be shown in the listbox
+scanners = iscanner.list_scanners()
+scannerlist = []
+
+# list those scanners as strings
+for i in scanners:
+    p = str(scanners[scanners.index(i)])
+    scannerlist.append(p)
+
+# 'Please choose the scanner'
+l0 = tk.Label(frame1, text='Please choose the scanner:', justify='left', font=('Ariel', 10))
+l0.grid(column=0, row=0, pady=5)#, padx=10)
+l0.configure(width=38, anchor=tk.W)#, width=45)
+
+# listbox
+lbox = tk.Listbox(frame1, height=4, selectmode=tk.SINGLE)#, yscrollcommand=scrollbar.set)
+lbox.insert(0, *scannerlist)
+lbox.grid(column=0, row=1, padx=10)#, pady=10) #rowspan=8
+lbox.configure(width=50)
+
+# The label: File Format
+l1 = tk.Label(frame2, text='File Format:', font=('Ariel', 10))
+l1.grid(column=0, row=1, pady=5)#, padx=10)
+l1.configure(anchor=tk.W, width=45)
+
+# Radiobuttons
+var = tk.IntVar()
+r1 = tk.Radiobutton(frame3, text="JPEG", variable=var, value=1)
+r2 = tk.Radiobutton(frame3, text="PNG", variable=var, value=2)
+r3 = tk.Radiobutton(frame3, text="PDF", variable=var, value=3)
+
+r1.grid(column=1, row=2)
+r2.grid(column=2, row=2)
+r3.grid(column=3, row=2)
+
+
+# empty string to adjust spacing
+l2 = tk.Label(frame3, text=' ', font=('Ariel', 10))
+l2.grid(column=4, row=2)#, padx=10)
+l2.configure(anchor=tk.W, width=20)
+
+# initiating isClicked as False to confirm clicking on 'Scan' before 'Save' 
+global isClicked
+isClicked = False
+
+
+# The class act (if so!):
+class Scan_n_save:
+
+    isClicked = False
+
+    def scan(self):
+        opt = lbox.curselection()
+        scanner = scanners[int(opt[0])]
+        global im
+        im = scanner.scan()
+        im.show()
+        self.isClicked = True
+
+
+    def save(self):
+
+        if int(var.get()) == 1:
+            startwindow.filename = tkFileDialog.asksaveasfilename(initialdir="/", title="Select file", filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*")))
+            path = str(startwindow.filename)
+            im.save(r"%s.jpg" % path)
+
+        if int(var.get()) == 2:
+            startwindow.filename = tkFileDialog.asksaveasfilename(initialdir="/", title="Select file", filetypes=(("png files", "*.png"), ("all files", "*.*")))
+            path = str(startwindow.filename)
+            im.save(r"%s.png" % path)
+
+        if int(var.get()) == 3:
+            startwindow.filename = tkFileDialog.asksaveasfilename(initialdir="/", title="Select file", filetypes=(("pdf files", "*.pdf"), ("all files", "*.*")))
+            path = str(startwindow.filename)
+            im.save(r"%s.pdf" % path)
+
+
+the_class = Scan_n_save()
+
+scanbut = tk.Button(frame1, text='Scan', justify='center', font=('Ariel', 10), height=1, width=6, command=the_class.scan)
+scanbut.grid(column=1, row=1) #, padx=10, pady=10)
+
+
+def choice():
+    if the_class.isClicked == True:
+        the_class.save()
+    else:
+        tkMessageBox.showinfo('Oops!', 'Please scan the image before saving!')
+
+
+
+savebut = tk.Button(frame3, text='Save', font=('Ariel', 10), height=1, width=6, command=choice)
+savebut.grid(column=5, row=2)#, columnspan=3)#, sticky=tk.E) #, padx=30) #, pady=10)
+
+
+startwindow.mainloop()
+
+
+
+
+
+
